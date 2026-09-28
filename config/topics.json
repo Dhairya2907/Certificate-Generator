@@ -1,0 +1,37 @@
+{
+  "EU MDR Technical Documentation": [
+    "Overview of EU MDR 2017/745 technical documentation requirements",
+    "Device classification and conformity assessment pathway",
+    "GSPR alignment and evidence planning",
+    "PMS, PMCF, risk management, and clinical evaluation linkage"
+  ],
+  "ISO 13485 Internal Auditor Training": [
+    "ISO 13485:2016 process-based audit approach",
+    "Audit planning, checklist preparation, and evidence review",
+    "Identification and reporting of nonconformities",
+    "Corrective action follow-up and audit closure"
+  ],
+  "IVDR Training": [
+    "Overview of IVDR 2017/746 requirements",
+    "Classification rules and conformity assessment routes",
+    "Performance evaluation and technical documentation requirements",
+    "PMS, PMPF, vigilance, and post-market obligations"
+  ],
+  "Risk Management ISO 14971": [
+    "Risk management principles under ISO 14971",
+    "Hazard identification and risk estimation",
+    "Risk control measures and residual risk evaluation",
+    "Linkage between risk management, PMS, and clinical evaluation"
+  ],
+  "In-Vitro Diagnostic Regulations": [
+    "Legal framework, roles, and responsibilities of economic operators",
+    "Risk Management, GSPR, Classification Rules, Conformity Assessment Routes, Performance Evaluation, PMS, and PMPF",
+    "UDI and Eudamed, Vigilance and Reporting"
+  ],
+  "MDSAP Awareness": [
+    "The benefits of MDSAP",
+    "The MDSAP audit model",
+    "NC grading in MDSAP",
+    "Specific MDSAP requirements"
+  ]
+}

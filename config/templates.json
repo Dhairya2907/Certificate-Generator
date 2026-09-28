@@ -1,0 +1,204 @@
+{
+  "eu_mdr": {
+    "display_name": "EU MDR Certificate",
+    "file": "templates/eu_mdr_template.pdf",
+    "page_size": [595.5, 842.25],
+    "date_format": "ordinal",
+    "static_overrides": [
+      {
+        "_comment": "Blank template's CERTIFICATE sits lower than the reference layout, leaving no room for OF ACHIEVEMENT above the name. Move it up. Uses PDF redaction (not a fill rectangle) so the watermark graphic behind it stays visible.",
+        "redact_rect": [155, 198, 445, 287.5],
+        "text": "CERTIFICATE", "x": 297.75, "y": 238,
+        "fontsize": 47, "font": "helv", "color": [0.05, 0.05, 0.05], "align": "center"
+      },
+      {
+        "_comment": "Blank template prints 'OF ACHIEVEMENT' small and low, colliding with the name. Redraw it bigger, right after CERTIFICATE, on top of the watermark like the reference.",
+        "redact_rect": [230, 340, 370, 362],
+        "text": "OF ACHIEVEMENT", "x": 297.75, "y": 270,
+        "fontsize": 23, "font": "helv", "color": [0.05, 0.05, 0.05], "align": "center"
+      },
+      {
+        "_comment": "Fixes a spacing defect baked into the template ('for completingatraining').",
+        "redact_rect": [210, 368, 380, 389],
+        "text": "for completing a training on", "x": 297.75, "y": 383,
+        "fontsize": 14, "font": "helv", "color": [0.05, 0.05, 0.05], "align": "center"
+      }
+    ],
+    "fields": {
+      "participant_name": {
+        "x": 297.75, "y_center": 336, "center_vertically": true,
+        "fontsize": 20, "font": "hebo", "color": [0.05, 0.05, 0.05],
+        "align": "center", "wrap": true, "max_width": 340, "line_spacing": 27
+      },
+      "training_topic": {
+        "x": 297.75, "y_center": 420, "center_vertically": true,
+        "fontsize": 16, "font": "hebo", "color": [0.05, 0.05, 0.05],
+        "align": "center", "wrap": true, "max_width": 215, "line_spacing": 22
+      },
+      "date": {
+        "x": 297.75, "y": 464, "shrink": true, "min_fontsize": 9,
+        "fontsize": 13, "font": "hebo", "color": [0.05, 0.05, 0.05],
+        "align": "center", "max_width": 350,
+        "date_prefix": "DATE: ",
+        "redact_rect": [280, 450, 332, 470]
+      },
+      "address": {
+        "x": 297.75, "y": 505, "fontsize": 14, "font": "hebo",
+        "color": [0.05, 0.05, 0.05], "align": "center", "wrap": true,
+        "max_width": 380, "line_spacing": 18
+      },
+      "course_highlights": {
+        "x": 151.5, "y": 592.0, "fontsize": 13, "font": "helv",
+        "color": [0.1, 0.1, 0.1], "align": "left", "max_width": 330,
+        "line_spacing": 14.8, "bullet": ""
+      },
+      "certificate_number": {
+        "x": 113, "y": 836.0, "shrink": true, "min_fontsize": 3.0,
+        "fontsize": 4.3, "font": "hebo",
+        "color": [0.05, 0.05, 0.05], "align": "left", "max_width": 59,
+        "redact_rect": [108, 831, 172, 839]
+      }
+    }
+  },
+  "cpd_iso13485": {
+    "display_name": "CPD ISO 13485 Certificate",
+    "file": "templates/cpd_iso13485_template.pdf",
+    "page_size": [595.5, 842.25],
+    "date_format": "ordinal",
+    "static_overrides": [
+      {
+        "_comment": "Blank template's CERTIFICATE sits lower than the reference layout, leaving no room for OF ACHIEVEMENT above the name. Move it up. Uses PDF redaction (not a fill rectangle) so the background stays exactly as it was.",
+        "redact_rect": [170, 220, 455, 287],
+        "text": "CERTIFICATE", "x": 297.75, "y": 240,
+        "fontsize": 45.5, "font": "helv", "color": [0.05, 0.05, 0.05], "align": "center"
+      },
+      {
+        "_comment": "Same fix as EU MDR: 'OF ACHIEVEMENT' is baked in small and low, colliding with the name. Redraw it bigger, right after CERTIFICATE.",
+        "redact_rect": [245, 335, 385, 358],
+        "text": "OF ACHIEVEMENT", "x": 297.75, "y": 278,
+        "fontsize": 22, "font": "helv", "color": [0.05, 0.05, 0.05], "align": "center"
+      }
+    ],
+    "fields": {
+      "participant_name": {
+        "x": 297.75, "y_center": 350, "center_vertically": true,
+        "fontsize": 17.5, "font": "hebo", "color": [0.05, 0.05, 0.05],
+        "align": "center", "wrap": true, "max_width": 320, "line_spacing": 23.5
+      },
+      "training_topic": {
+        "x": 304.4, "y_center": 430.85, "center_vertically": true,
+        "fontsize": 14, "font": "hebo", "color": [0.05, 0.05, 0.05],
+        "align": "center", "wrap": true, "max_width": 270, "line_spacing": 19
+      },
+      "date": {
+        "x": 297.75, "y": 503, "shrink": true, "min_fontsize": 9,
+        "fontsize": 13, "font": "helv", "color": [0.05, 0.05, 0.05],
+        "align": "center", "max_width": 300
+      },
+      "address": {
+        "x": 65, "y": 753.0, "fontsize": 11, "font": "helv",
+        "color": [0.05, 0.05, 0.05], "align": "left", "wrap": true,
+        "max_width": 185, "line_spacing": 12.5
+      },
+      "course_highlights": {
+        "x": 172, "y": 553.9, "fontsize": 12.5, "font": "helv",
+        "color": [0.1, 0.1, 0.1], "align": "left", "max_width": 275,
+        "line_spacing": 17.7, "bullet": "•  "
+      },
+      "certificate_number": {
+        "x": 74, "y": 826.5, "shrink": true, "min_fontsize": 3.0,
+        "fontsize": 4.7, "font": "hebo",
+        "color": [0.05, 0.05, 0.05], "align": "left", "max_width": 64,
+        "redact_rect": [70, 821, 138, 829]
+      }
+    }
+  },
+  "ivdr": {
+    "display_name": "IVDR Certificate",
+    "file": "templates/ivdr_template.pdf",
+    "page_size": [669.75, 445.5],
+    "date_format": "ordinal",
+    "fields": {
+      "participant_name": {
+        "x": 345.4, "y": 149.9, "shrink": true, "min_fontsize": 10,
+        "fontsize": 16, "font": "hebo", "color": [0.05, 0.05, 0.05],
+        "align": "center", "max_width": 420
+      },
+      "training_topic": {
+        "x": 345.4, "y_center": 207.15, "center_vertically": true,
+        "fontsize": 16, "font": "hebo", "color": [0.05, 0.05, 0.05],
+        "align": "center", "wrap": true, "max_width": 380, "line_spacing": 21.7
+      },
+      "date": {
+        "x": 345.4, "y": 267.7, "shrink": true, "min_fontsize": 9,
+        "fontsize": 12, "font": "helv", "color": [0.05, 0.05, 0.05],
+        "align": "center", "max_width": 400
+      },
+      "address": {
+        "x": 28.9, "y": 385.4, "fontsize": 9, "font": "helv",
+        "color": [0.05, 0.05, 0.05], "align": "left", "wrap": true,
+        "max_width": 260, "line_spacing": 12,
+        "redact_rect": [25, 376, 300, 414]
+      },
+      "course_highlights": {
+        "x": 345.4, "y": 303.4, "fontsize": 11, "font": "helv",
+        "color": [0.1, 0.1, 0.1], "align": "center", "max_width": 375,
+        "line_spacing": 14.3, "bullet": "•  "
+      },
+      "certificate_number": {
+        "x": 6.3, "y": 80.7, "shrink": true, "min_fontsize": 3.0,
+        "fontsize": 4.33, "font": "hebo",
+        "color": [0.05, 0.05, 0.05], "align": "left", "max_width": 70,
+        "rotate": 270,
+        "redact_rect": [3, 80, 10, 136]
+      }
+    },
+    "extra_fields": {
+      "trainer2_name": {
+        "label": "Second Trainer Name", "default": "DR. ANITA JOSHI",
+        "placeholder": "e.g. Dr. Anita Joshi",
+        "x": 334.87, "y": 412.3, "shrink": true, "min_fontsize": 7,
+        "fontsize": 9.86, "font": "hebo", "color": [0.05, 0.05, 0.05],
+        "align": "center", "max_width": 110,
+        "redact_rect": [280, 403, 388, 416]
+      }
+    }
+  },
+  "neulearn_masterclass": {
+    "display_name": "NeuLearn Masterclass Certificate",
+    "file": "templates/Certificate template_NeuLearn.pdf",
+    "page_size": [669.75, 445.5],
+    "date_format": "ordinal",
+    "fields": {
+      "participant_name": {
+        "_comment": "Replaces the template's bold 'Name' placeholder in place.",
+        "redact_rect": [55, 124, 300, 146],
+        "x": 57.7, "y": 141, "shrink": true, "min_fontsize": 12,
+        "fontsize": 18, "font": "hebo", "color": [0.05, 0.05, 0.05],
+        "align": "left", "max_width": 590
+      },
+      "training_topic": {
+        "_comment": "Replaces the template's bold 'Course Name' placeholder in place, right after 'has attended free live masterclass online course on'.",
+        "redact_rect": [55, 188, 610, 210],
+        "x": 57.7, "y": 205, "shrink": true, "min_fontsize": 12,
+        "fontsize": 18, "font": "hebo", "color": [0.05, 0.05, 0.05],
+        "align": "left", "max_width": 590
+      },
+      "date": {
+        "_comment": "Redraws 'DATE: <value>' over the preprinted 'DATE:' label.",
+        "redact_rect": [55, 242, 400, 262],
+        "x": 58.98, "y": 257, "shrink": true, "min_fontsize": 9,
+        "fontsize": 13, "font": "hebo", "color": [0.05, 0.05, 0.05],
+        "align": "left", "max_width": 340,
+        "date_prefix": "DATE: "
+      },
+      "certificate_number": {
+        "_comment": "Template's placeholder footer text uses extra letter-spacing (tracking) between characters - matched here with letter_spacing so a redrawn number looks native, not just a plain reprint.",
+        "redact_rect": [253, 424, 320, 434],
+        "x": 255.6, "y": 432, "shrink": true, "min_fontsize": 5.0,
+        "fontsize": 7.8, "font": "hebo", "color": [0.05, 0.05, 0.05],
+        "align": "left", "max_width": 68, "letter_spacing": 1.8
+      }
+    }
+  }
+}
