@@ -121,31 +121,31 @@ def _draw_highlights(page, field_cfg: dict, highlights: list):
             cursor_y += line_spacing
 
 
-def generate_certificate(
-    template_key: str,
+def render_certificate_overlay(
+    pdf_bytes: bytes,
+    fields: dict,
     participant_name: str,
     training_topic: str,
     course_highlights: list,
     date_text: str,
     address: str,
     certificate_number: str,
+    extra_fields: dict = None,
     extra_values: dict = None,
+    static_overrides: list = None,
 ) -> bytes:
-    """Build the final certificate PDF and return its bytes."""
-    config = load_template_config()[template_key]
-    template_path = os.path.join(BASE_DIR, config["file"])
+    """Overlay the variable fields onto a template's raw PDF bytes and return
+    the result's bytes. This is the shared drawing core behind both
+    generate_certificate() (which looks a template up by key in
+    config/templates.json) and the Add New Template wizard's live preview
+    (which draws directly onto a not-yet-saved upload using in-progress field
+    positions, before anything is written to disk)."""
+    extra_fields = extra_fields or {}
     extra_values = extra_values or {}
+    static_overrides = static_overrides or []
 
-    if not os.path.exists(template_path):
-        raise FileNotFoundError(
-            f"Template file not found: {template_path}\n"
-            "Place the original certificate PDF in the templates/ folder with this exact name."
-        )
-
-    doc = fitz.open(template_path)
+    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
     page = doc[0]
-    fields = config["fields"]
-    extra_fields = config.get("extra_fields", {})
 
     # Remove old fixed text (e.g. a mispositioned "OF ACHIEVEMENT", the
     # baked-in footer certificate number) using PDF redaction rather than
@@ -154,14 +154,14 @@ def generate_certificate(
     # images/watermarks - completely untouched, so the new text drawn on top
     # sits on the real background instead of a flat color patch.
     redact_rects = [f["redact_rect"] for f in fields.values() if f.get("redact_rect")]
-    redact_rects += [o["redact_rect"] for o in config.get("static_overrides", []) if o.get("redact_rect")]
+    redact_rects += [o["redact_rect"] for o in static_overrides if o.get("redact_rect")]
     redact_rects += [f["redact_rect"] for f in extra_fields.values() if f.get("redact_rect")]
     for rect in redact_rects:
         page.add_redact_annot(fitz.Rect(*rect), fill=None)
     if redact_rects:
         page.apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)
 
-    for override in config.get("static_overrides", []):
+    for override in static_overrides:
         _draw_text_block(page, override, override["text"])
 
     _draw_text_block(page, fields["participant_name"], participant_name)
@@ -181,9 +181,47 @@ def generate_certificate(
         if value:
             _draw_text_block(page, extra_cfg, value)
 
-    pdf_bytes = doc.tobytes()
+    result_bytes = doc.tobytes()
     doc.close()
-    return pdf_bytes
+    return result_bytes
+
+
+def generate_certificate(
+    template_key: str,
+    participant_name: str,
+    training_topic: str,
+    course_highlights: list,
+    date_text: str,
+    address: str,
+    certificate_number: str,
+    extra_values: dict = None,
+) -> bytes:
+    """Build the final certificate PDF and return its bytes."""
+    config = load_template_config()[template_key]
+    template_path = os.path.join(BASE_DIR, config["file"])
+
+    if not os.path.exists(template_path):
+        raise FileNotFoundError(
+            f"Template file not found: {template_path}\n"
+            "Place the original certificate PDF in the templates/ folder with this exact name."
+        )
+
+    with open(template_path, "rb") as f:
+        pdf_bytes = f.read()
+
+    return render_certificate_overlay(
+        pdf_bytes=pdf_bytes,
+        fields=config["fields"],
+        participant_name=participant_name,
+        training_topic=training_topic,
+        course_highlights=course_highlights,
+        date_text=date_text,
+        address=address,
+        certificate_number=certificate_number,
+        extra_fields=config.get("extra_fields", {}),
+        extra_values=extra_values,
+        static_overrides=config.get("static_overrides", []),
+    )
 
 
 def render_preview_png(pdf_bytes: bytes, zoom: float = 1.5) -> bytes:

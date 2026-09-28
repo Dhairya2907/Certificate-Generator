@@ -16,14 +16,17 @@ import streamlit as st
 
 from utils.bulk_generator import generate_bulk, sample_template_bytes
 from utils.pdf_engine import (
+    BASE_DIR,
     CONFIG_PATH,
     TOPICS_PATH,
     generate_certificate,
     load_template_config,
     load_topics,
+    render_certificate_overlay,
     render_preview_png,
 )
-from utils.text_utils import format_date_ordinal
+from utils.template_wizard import build_template_config
+from utils.text_utils import format_date_ordinal, slugify
 
 st.set_page_config(page_title="Neujin Certificate Generator", page_icon="📜", layout="centered")
 
@@ -33,7 +36,9 @@ templates = load_template_config()
 topics = load_topics()
 template_options = {cfg["display_name"]: key for key, cfg in templates.items()}
 
-single_tab, bulk_tab, topics_tab = st.tabs(["Single Certificate", "Bulk Generate (Excel)", "Manage Training Topics"])
+single_tab, bulk_tab, topics_tab, new_template_tab = st.tabs(
+    ["Single Certificate", "Bulk Generate (Excel)", "Manage Training Topics", "Add New Template"]
+)
 
 # ---------------------------------------------------------------------------
 # Single certificate form
@@ -274,6 +279,179 @@ with topics_tab:
                         json.dump(topics, f, indent=2)
                     st.success(f"Deleted '{topic_to_edit}'.")
                     st.rerun()
+
+# ---------------------------------------------------------------------------
+# Add New Template - lets anyone add a brand-new certificate design by
+# uploading the blank PDF, with no file editing or coordinate-hunting.
+# Field positions are auto-detected by searching the PDF for common label
+# text ("Name", "Course Name", "Date", "Certificate No.", ...); every field's
+# position is then shown as an editable x/y/font size/width right here, with
+# a live preview, so it can be adjusted and confirmed before anything is
+# saved - not just fixed up afterwards in a separate Calibration Mode step.
+# ---------------------------------------------------------------------------
+
+_SAMPLE_VALUES = {
+    "participant_name": "Sample Name",
+    "training_topic": "Sample Course Title",
+    "date": "20th April 2026",
+    "address": "Sample Address, City",
+    "certificate_number": "SAMPLE-001",
+}
+_SAMPLE_HIGHLIGHTS = ["Sample highlight one", "Sample highlight two"]
+
+with new_template_tab:
+    st.subheader("Add a new template")
+    st.caption(
+        "Upload the blank certificate PDF, adjust any field position that needs it "
+        "using the live preview, then save - it becomes immediately usable above "
+        "and in Bulk Generate."
+    )
+
+    new_pdf = st.file_uploader("Blank certificate PDF", type=["pdf"], key="new_template_pdf")
+    new_display_name = st.text_input("Template name", key="new_template_name", placeholder="e.g. Advanced Diploma Certificate")
+
+    col_a, col_b = st.columns(2)
+    with col_a:
+        new_has_address = st.checkbox("Design prints an address / venue line", key="new_template_has_address")
+    with col_b:
+        new_has_highlights = st.checkbox("Design has a course-highlights bullet list", key="new_template_has_highlights")
+
+    if new_pdf is not None:
+        pdf_bytes = new_pdf.getvalue()
+        detect_key = (new_pdf.name, len(pdf_bytes), new_has_address, new_has_highlights)
+        if st.session_state.get("wizard_detect_key") != detect_key:
+            try:
+                fields, page_size, warnings = build_template_config(pdf_bytes, new_has_address, new_has_highlights)
+                # Drop any leftover per-field widget state from a previous upload so
+                # the number inputs below start from this file's fresh detection.
+                for k in list(st.session_state.keys()):
+                    if k.startswith("wizard_pos_"):
+                        del st.session_state[k]
+                st.session_state["wizard_fields"] = fields
+                st.session_state["wizard_page_size"] = page_size
+                st.session_state["wizard_warnings"] = warnings
+                st.session_state["wizard_detect_key"] = detect_key
+                st.session_state["wizard_pdf_bytes"] = pdf_bytes
+                st.session_state.pop("wizard_preview_png", None)
+            except Exception as e:
+                st.error(f"Couldn't read that PDF: {e}")
+                st.session_state.pop("wizard_fields", None)
+
+    wizard_fields = st.session_state.get("wizard_fields")
+
+    if wizard_fields:
+        warnings = st.session_state.get("wizard_warnings", [])
+        if warnings:
+            st.info(
+                "Couldn't auto-detect a position for: " + ", ".join(warnings) + ". "
+                "They've been given a rough starting spot - pick them below, check the "
+                "preview, and adjust x/y until they land correctly."
+            )
+
+        st.markdown("**Field positions**")
+        wizard_field_choice = st.selectbox("Field to adjust", list(wizard_fields.keys()), key="wizard_field_choice")
+        wcfg = wizard_fields[wizard_field_choice]
+
+        wc1, wc2, wc3, wc4 = st.columns(4)
+        with wc1:
+            wcfg["x"] = st.number_input("x", value=float(wcfg.get("x", 50.0)), step=1.0, key=f"wizard_pos_x_{wizard_field_choice}")
+        with wc2:
+            wcfg["y"] = st.number_input("y", value=float(wcfg.get("y", 50.0)), step=1.0, key=f"wizard_pos_y_{wizard_field_choice}")
+        with wc3:
+            wcfg["fontsize"] = st.number_input("font size", value=float(wcfg.get("fontsize", 14)), step=0.5, key=f"wizard_pos_size_{wizard_field_choice}")
+        with wc4:
+            wcfg["max_width"] = st.number_input("max width", value=float(wcfg.get("max_width", 300)), step=10.0, key=f"wizard_pos_width_{wizard_field_choice}")
+
+        if st.button("Preview with sample data", key="wizard_preview_btn"):
+            try:
+                preview_bytes = render_certificate_overlay(
+                    pdf_bytes=st.session_state["wizard_pdf_bytes"],
+                    fields=wizard_fields,
+                    participant_name=_SAMPLE_VALUES["participant_name"],
+                    training_topic=_SAMPLE_VALUES["training_topic"],
+                    course_highlights=_SAMPLE_HIGHLIGHTS,
+                    date_text=_SAMPLE_VALUES["date"],
+                    address=_SAMPLE_VALUES["address"],
+                    certificate_number=_SAMPLE_VALUES["certificate_number"],
+                )
+                st.session_state["wizard_preview_png"] = render_preview_png(preview_bytes)
+            except Exception as e:
+                st.error(f"Couldn't render preview: {e}")
+
+        if "wizard_preview_png" in st.session_state:
+            st.image(st.session_state["wizard_preview_png"], caption="Preview with sample data - adjust fields above and re-preview as needed", use_container_width=True)
+
+        st.divider()
+        st.markdown("Once every field looks right in the preview:")
+        if st.button("Save Template", type="primary", key="wizard_save_btn"):
+            if not new_display_name.strip():
+                st.error("Please give the template a name.")
+            elif any(cfg["display_name"].lower() == new_display_name.strip().lower() for cfg in templates.values()):
+                st.error(f"A template named '{new_display_name.strip()}' already exists.")
+            else:
+                base_key = slugify(new_display_name)
+                key = base_key
+                n = 1
+                while key in templates:
+                    n += 1
+                    key = f"{base_key}_{n}"
+
+                template_rel_path = f"templates/{key}.pdf"
+                with open(os.path.join(BASE_DIR, template_rel_path), "wb") as f:
+                    f.write(st.session_state["wizard_pdf_bytes"])
+
+                templates[key] = {
+                    "display_name": new_display_name.strip(),
+                    "file": template_rel_path,
+                    "page_size": st.session_state["wizard_page_size"],
+                    "date_format": "ordinal",
+                    "fields": wizard_fields,
+                }
+                with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+                    json.dump(templates, f, indent=2)
+
+                for k in list(st.session_state.keys()):
+                    if k.startswith("wizard_"):
+                        del st.session_state[k]
+
+                st.success(f"Created '{new_display_name.strip()}'. Select it above to generate certificates.")
+                st.rerun()
+
+    st.divider()
+    st.subheader("Rename or delete an existing template")
+
+    if not templates:
+        st.info("No templates configured yet.")
+    else:
+        manage_display = st.selectbox("Choose a template", list(template_options.keys()), key="manage_template_choice")
+        manage_key = template_options[manage_display]
+
+        manage_col1, manage_col2 = st.columns(2)
+        with manage_col1:
+            renamed = st.text_input("Name", value=manage_display, key="manage_template_rename")
+            if st.button("Save name", key="manage_template_rename_btn", use_container_width=True):
+                new_name = renamed.strip()
+                if not new_name:
+                    st.error("Please enter a name.")
+                elif new_name.lower() != manage_display.lower() and any(
+                    cfg["display_name"].lower() == new_name.lower() for cfg in templates.values()
+                ):
+                    st.error(f"A template named '{new_name}' already exists.")
+                else:
+                    templates[manage_key]["display_name"] = new_name
+                    with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+                        json.dump(templates, f, indent=2)
+                    st.success(f"Renamed to '{new_name}'.")
+                    st.rerun()
+        with manage_col2:
+            st.write("")
+            st.write("")
+            if st.button(f"Delete '{manage_display}'", key="manage_template_delete_btn", use_container_width=True):
+                del templates[manage_key]
+                with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+                    json.dump(templates, f, indent=2)
+                st.success(f"Deleted '{manage_display}' (its PDF file was left in templates/, only removed from the list).")
+                st.rerun()
 
 # ---------------------------------------------------------------------------
 # Calibration mode - lets a non-developer nudge field positions/sizes and

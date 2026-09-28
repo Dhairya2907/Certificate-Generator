@@ -1,6 +1,14 @@
 """Small text helpers: ordinal date formatting and word-wrap for the PDF overlay."""
 
+import re
+
 import fitz  # PyMuPDF
+
+
+def slugify(text: str) -> str:
+    """'My New Certificate!' -> 'my_new_certificate' (used as a template's internal key)."""
+    slug = re.sub(r"[^a-z0-9]+", "_", text.strip().lower()).strip("_")
+    return slug or "template"
 
 
 def ordinal_suffix(day: int) -> str:

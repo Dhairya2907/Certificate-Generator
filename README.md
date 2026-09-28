@@ -20,7 +20,8 @@ Certificate generator/
 │   └── ivdr_template.pdf        # <- add this file yourself (see below)
 ├── utils/
 │   ├── pdf_engine.py           # core overlay logic (PyMuPDF)
-│   ├── text_utils.py           # date formatting, text wrap/autosize
+│   ├── text_utils.py           # date formatting, text wrap/autosize, slugify
+│   ├── template_wizard.py      # auto-detects field positions for a newly uploaded template
 │   └── bulk_generator.py       # Excel-driven batch generation, ZIP packaging
 ├── tools/
 │   └── render_grid.py          # optional: prints a coordinate grid over a template
@@ -174,9 +175,40 @@ stay exactly as printed on the original template.
 
 ## Adding another certificate template
 
-The template dropdown is built entirely from `config/templates.json` - adding
-a new entry there and dropping in the PDF is enough for it to show up, no
-other code changes required. To add one:
+### The easy way - no file editing, for anyone
+
+The **Add New Template** tab lets anyone add a brand-new certificate design
+straight from the browser, with no file editing, no coordinates, and no
+developer needed:
+
+1. Upload the blank certificate PDF.
+2. Give it a name.
+3. Tick whether the design prints an address/venue line and/or a
+   course-highlights bullet list.
+4. It searches the PDF for common label text ("Name", "Course Name", "Date",
+   "Certificate No.", ...) and works out a starting position for each field -
+   the same thing a developer would otherwise do by hand. Anything it
+   couldn't find gets a rough default position instead, flagged in a message
+   so you know which ones to check.
+5. Pick each field from the **Field to adjust** dropdown and fine-tune its
+   x/y/font size/max width, clicking **Preview with sample data** to see
+   exactly how it lands on the real template - all before anything is saved.
+   Repeat for any field that isn't quite right yet.
+6. Once the preview looks right, click **Save Template**. It appears
+   immediately in the Single Certificate dropdown and in Bulk Generate.
+
+Further down the same tab, **Rename or delete an existing template** lets you
+fix a template's display name or remove one from the list later (the PDF
+file itself is left in `templates/`, only its `config/templates.json` entry
+is removed) - no JSON editing needed for that either. **Calibration mode** in
+the sidebar still works the same way afterwards, for reworking a template's
+positions once it's already in daily use.
+
+### The manual way - precise control, for a developer
+
+The template dropdown is built entirely from `config/templates.json`, so if
+you'd rather set exact coordinates yourself (or need something the wizard's
+detection missed), you can add a new entry there directly. To add one:
 
 1. Save the blank master PDF into `templates/`, e.g. `templates/new_template.pdf`.
    If you have a filled example of the same design, keep it too (e.g.
